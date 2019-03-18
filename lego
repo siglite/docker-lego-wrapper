@@ -1,0 +1,31 @@
+#!/bin/bash
+
+set -eu
+
+docker_run() {
+    local CERTDIR="/etc/letsencrypt"
+    docker run --rm -v "$CERTDIR:$CERTDIR" xenolf/lego --path "$CERTDIR" "$@"
+}
+
+# if docker has not installed
+if [ "$(which docker)" = "" ]; then
+    echo "Error: docker not exists..." >&2
+    exit 1
+fi
+
+# Print version and certificates
+if [ "$#" = 0 ]; then
+    docker_run -v
+    docker_run list
+    exit
+fi
+
+# Update docker images
+if [ "$1" = "update" ]; then
+    echo "[ Update lego... ]"
+    docker pull xenolf/lego
+    exit
+fi
+
+# else if
+docker_run "$@"
