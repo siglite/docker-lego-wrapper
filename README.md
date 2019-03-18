@@ -2,6 +2,11 @@
 
 [lego](https://github.com/go-acme/lego) using with docker.
 
+## Feature
+
+- Add `lego update` command
+- Change default directory to `/etc/letsencrypt`
+
 ## Usage
 
 ```console
