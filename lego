@@ -7,6 +7,15 @@ docker_run() {
     docker run --rm -v "$CERTDIR:$CERTDIR" xenolf/lego --path "$CERTDIR" "$@"
 }
 
+section() {
+    echo ""
+    echo "[""$*""]"
+}
+
+indent() {
+    echo "$*" | sed -e 's/^/    /'
+}
+
 lego_commands() {
     docker_run help \
         | sed -n '/COMMANDS:/,/^$/p' \
@@ -16,16 +25,20 @@ lego_commands() {
 }
 
 lego_usage() {
+    # Print version
     docker_run -v
-    echo ''
-    echo '[Commands]'
-    lego_commands | sed -e 's/^/    /'
-    echo ''
-    echo '[Additional Commands]'
-    echo '    update   Update docker image'
-    echo ''
-    echo '[Certificates]'
-    docker_run list | sed -e 's/^/    /'
+
+    # Print default commands
+    section 'Commands'
+    indent  "$(lego_commands)"
+
+    # Print additional commands
+    section 'Additional Commands'
+    echo    '    update   Update docker image'
+
+    # Print certificates
+    section 'Certificates'
+    indent  "$(docker_run list)"
 }
 
 # if docker has not installed
@@ -34,13 +47,13 @@ if [ "$(which docker)" = "" ]; then
     exit 1
 fi
 
-# Print version and certificates
+# Print usage if no args
 if [ "$#" = 0 ]; then
     lego_usage
     exit
 fi
 
-# Update docker images
+# `lego update`
 if [ "$1" = "update" ]; then
     echo "[ Update lego... ]"
     docker pull xenolf/lego
