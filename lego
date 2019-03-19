@@ -7,6 +7,27 @@ docker_run() {
     docker run --rm -v "$CERTDIR:$CERTDIR" xenolf/lego --path "$CERTDIR" "$@"
 }
 
+lego_commands() {
+    docker_run help \
+        | sed -n '/COMMANDS:/,/^$/p' \
+        | sed -e '/^$/d' \
+        | sed -e '/COMMANDS:/d' \
+        | sed -e 's/^ \+//'
+}
+
+lego_usage() {
+    docker_run -v
+    echo ''
+    echo '[Commands]'
+    lego_commands | sed -e 's/^/    /'
+    echo ''
+    echo '[Additional Commands]'
+    echo '    update   Update docker image'
+    echo ''
+    echo '[Certificates]'
+    docker_run list | sed -e 's/^/    /'
+}
+
 # if docker has not installed
 if [ "$(which docker)" = "" ]; then
     echo "Error: docker not exists..." >&2
@@ -15,8 +36,7 @@ fi
 
 # Print version and certificates
 if [ "$#" = 0 ]; then
-    docker_run -v
-    docker_run list
+    lego_usage
     exit
 fi
 
